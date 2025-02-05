@@ -12,6 +12,31 @@ model User {
   name String
 }
 
-model Admin {
-  id Int @unique @default(autoincrement())
+model Module {
+  id_module   Int       @unique @default(autoincrement())
+  name_module String
+  chapters    Chapter[]
+}
+
+model Chapter {
+  id_chapter      Int       @unique @default(autoincrement())
+  name_chapter    String
+  lessons         Lessons[]
+  Module          Module?   @relation(fields: [moduleId_module], references: [id_module])
+  moduleId_module Int?
+}
+
+model Lessons {
+  id_lesson                 Int         @unique @default(autoincrement())
+  name_lesson               String
+  type                      lesson_type @relation(fields: [lesson_typeId_lesson_type], references: [id_lesson_type])
+  Chapter                   Chapter?    @relation(fields: [chapterId_chapter], references: [id_chapter])
+  chapterId_chapter         Int?
+  lesson_typeId_lesson_type Int
+}
+
+model lesson_type {
+  id_lesson_type   Int       @unique @default(autoincrement())
+  name_lesson_type String
+  Lessons          Lessons[]
 }
