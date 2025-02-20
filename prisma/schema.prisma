@@ -8,35 +8,178 @@ datasource db {
 }
 
 model User {
-  id   Int    @unique @default(autoincrement())
-  name String
+  id             Int               @id @default(autoincrement())
+  username       String            @unique
+  email          String            @unique
+  passwordHash   String // Хэш пароля, НИКОГДА не храните пароль в открытом виде
+  registrationDate DateTime          @default(now())
+  points         Int               @default(0)
+  streak         Int               @default(0)
+  lastActive     DateTime?           // Дата последнего посещения, может быть null, если пользователь не заходил после регистрации
+  completedCourses UserCourse[]    // Связь с пройденными курсами
+  exerciseAttempts ExerciseAttempt[]
+  userAchievements UserAchievement[]
+
+  @@map("users") // Явное указание имени таблицы для ясности
+  UserProgress UserProgress[]
 }
 
 model Module {
-  id_module   Int       @unique @default(autoincrement())
-  name_module String
-  chapters    Chapter[]
+  id            Int       @id @default(autoincrement())
+  nameModule    String
+  description String?    // Описание модуля
+  order         Int?  //Порядок отображения модулей на экране.
+  chapters      Chapter[]
+
+  @@map("modules")
+  Course Course[]
 }
 
 model Chapter {
-  id_chapter      Int       @unique @default(autoincrement())
-  name_chapter    String
-  lessons         Lessons[]
-  Module          Module?   @relation(fields: [moduleId_module], references: [id_module])
-  moduleId_module Int?
+  id            Int       @id @default(autoincrement())
+  nameChapter   String
+  order         Int?     // Порядок внутри модуля
+  lessons       Lesson[]
+  moduleId      Int       // Внешний ключ к Module
+  module        Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)  // Определение связи
+  description   String?     // Описание главы
+
+  @@map("chapters")
 }
 
-model Lessons {
-  id_lesson                 Int         @unique @default(autoincrement())
-  name_lesson               String
-  type                      lesson_type @relation(fields: [lesson_typeId_lesson_type], references: [id_lesson_type])
-  Chapter                   Chapter?    @relation(fields: [chapterId_chapter], references: [id_chapter])
-  chapterId_chapter         Int?
-  lesson_typeId_lesson_type Int
+model Lesson {
+  id            Int         @id @default(autoincrement())
+  nameLesson    String
+  order         Int?        // Порядок внутри главы
+  typeId        Int       // Внешний ключ к LessonType
+  type          LessonType @relation(fields: [typeId], references: [id], onDelete: Cascade) // Определение связи
+  chapterId     Int?         // Внешний ключ к Chapter
+  chapter       Chapter?    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  exercises     Exercise[]
+  userProgress  UserProgress[]
+  description   String?      // Описание урока
+  videoUrl      String?      // Ссылка на видеоурок
+  textContent   String?      // Текст урока или примеры кода
+
+  @@map("lessons")
 }
 
-model lesson_type {
-  id_lesson_type   Int       @unique @default(autoincrement())
-  name_lesson_type String
-  Lessons          Lessons[]
+model LessonType {
+  id            Int        @id @default(autoincrement())
+  name          String
+  lessons       Lesson[]
+
+  @@map("lesson_types")
+}
+
+
+model Exercise {
+  id             Int               @id @default(autoincrement())
+
+  lessonId       Int               // Внешний ключ к Lesson
+  lesson         Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  type           ExerciseType     // Тип упражнения: выбор ответа, завершение кода и т.д.
+  questionText   String?            // Текст вопроса или задание
+  correctAnswer  String?            // Правильный ответ (если возможно сохранить как текст)
+  codeTemplate   String?            // Шаблон кода для упражнений по программированию
+  hint           String?            // Подсказка
+  userAttempts ExerciseAttempt[]
+  order          Int?               //Порядок отображения упражнений на экране.
+  points         Int               @default(10) //Баллы, получаемые за правильное выполнение.
+  answers        Answer[]           // Доступные варианты ответов для вопросов с несколькими вариантами ответа
+
+  @@map("exercises")
+}
+
+enum ExerciseType {
+  MULTIPLE_CHOICE // Выбор ответа из нескольких вариантов
+  CODE_COMPLETION // Завершение кода
+  TRANSLATION   // Перевод
+  DRAG_AND_DROP  // Перетаскивание
+}
+
+model Answer {
+  id          Int       @id @default(autoincrement())
+  exerciseId  Int       //Внешний ключ к Exercise.
+  exercise  Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  text        String //Текст варианта ответа для вопросов с несколькими вариантами ответа.
+  isCorrect   Boolean @default(false) //Для отметки правильного варианта.
+
+  @@map("answers")
+}
+
+model UserProgress {
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    Int
+  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lastAccessed DateTime @default(now())
+  completed    Boolean @default(false)
+  score       Int     @default(0)
+  completionDate DateTime? //Дата и время завершения.
+
+  @@id([userId, lessonId]) // Составной первичный ключ
+
+  @@map("user_progress")
+}
+
+model ExerciseAttempt {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId  Int
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  attemptTime DateTime @default(now())
+  userAnswer  String?    //Ответ пользователя в виде текста. При необходимости можно использовать JSON.
+  correct     Boolean  @default(false)
+
+  @@map("exercise_attempts")
+}
+
+model Course {
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String?        // Описание курса
+  programmingLanguage String  // Язык программирования, например, "Python", "JavaScript"
+  modules Module[]
+  UserCourse     UserCourse[]  // Для отслеживания курсов пользователей
+
+  @@map("courses")
+}
+
+model UserCourse {
+  userId     Int
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId   Int
+  course     Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+  progress  Float @default(0)  //Прогресс в процентах для отображения.
+  completed   Boolean @default(false) // Для отслеживания пользователей, завершивших курс
+
+  @@id([userId, courseId]) // Составной первичный ключ
+
+  @@map("user_courses")
+}
+
+model Achievement {
+  id             Int              @id @default(autoincrement())
+  name           String
+  description    String?
+  pointsAwarded  Int              @default(100)
+  criteria       String           // Текст, описывающий критерии получения достижения
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId Int
+  achievement  Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  dateAwarded  DateTime   @default(now())
+
+  @@id([userId, achievementId]) // Составной первичный ключ
+
+  @@map("user_achievements")
 }
