@@ -11,18 +11,25 @@ model User {
   id             Int               @id @default(autoincrement())
   username       String            @unique
   email          String            @unique
-  passwordHash   String // Хэш пароля, НИКОГДА не храните пароль в открытом виде
+  passwordHash   String // Хэш пароля
   registrationDate DateTime          @default(now())
   points         Int               @default(0)
   streak         Int               @default(0)
-  lastActive     DateTime?           // Дата последнего посещения, может быть null, если пользователь не заходил после регистрации
-  completedCourses UserCourse[]    // Связь с пройденными курсами
+  lastActive     DateTime?           // Дата последнего посещения
+  completedCourses UserCourse[]
   exerciseAttempts ExerciseAttempt[]
   userAchievements UserAchievement[]
-
-  @@map("users") // Явное указание имени таблицы для ясности
+  role         Role @default(USER) // Добавляем поле role
   UserProgress UserProgress[]
-}
+
+  @@map("users")
+  }
+
+  enum Role {
+  USER
+  ADMIN
+  }
+  
 
 model Module {
   id            Int       @id @default(autoincrement())
@@ -130,7 +137,7 @@ model ExerciseAttempt {
   exerciseId  Int
   exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   attemptTime DateTime @default(now())
-  userAnswer  String?    //Ответ пользователя в виде текста. При необходимости можно использовать JSON.
+  userAnswer  String?    //Ответ пользователя в виде текста. ну или JSON 
   correct     Boolean  @default(false)
 
   @@map("exercise_attempts")

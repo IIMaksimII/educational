@@ -1,18 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RegisterDto } from 'src/auth/dto/regist.dto';
+import { LoginDto } from 'src/auth/dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-
-
-  @Get('/')
-  async getUsers() {
-    return this.authService.getUsers();
+  @Post('register')
+  async register(@Body(new ValidationPipe()) registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
-
-}
+  @Post('login')
+  async login(@Body(new ValidationPipe()) loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+};
