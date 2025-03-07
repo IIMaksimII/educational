@@ -70,7 +70,7 @@ export class AuthService {
     });
       
      if (!user) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException('Invalicredentialsd ');
       }
     // Сравните пароль с сохраненным хэшем
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
