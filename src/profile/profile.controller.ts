@@ -23,7 +23,7 @@ export class ProfileController {
   @Get()
   async getProfile(@Req() req) {
     const profileData = await this.profileService.getProfileById(req.user.sub);
-    console.log(req.user.sub); 
+   
     return profileData; 
   }
 }

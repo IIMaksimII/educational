@@ -5,6 +5,8 @@ import { PrismaModule } from 'src/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
+import { TrainingModule } from './training/training.module';
+
 
 @Module({
   imports: [
@@ -19,7 +21,8 @@ import { ProfileModule } from './profile/profile.module';
       inject: [ConfigService],
     }),
     ProfileModule,
-  ],
+    TrainingModule,
+    ],
   controllers: [AuthController],
   providers: [AuthService],
 })

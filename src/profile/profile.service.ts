@@ -22,7 +22,7 @@ export class ProfileService {
           UserProgress: true,
         },
       });
-      console.log(userProfile);
+     
       if (!userProfile) {
         throw new Error('Пользователь не найден');
       }
