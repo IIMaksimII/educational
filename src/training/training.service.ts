@@ -11,13 +11,17 @@ export class TrainingService {
     return this.prisma.module.findMany({
       include: {
         chapters: {
-          include: {
-            lessons: {
-              include: {
-                exercises: true,
-              },
-            },
-          },
+          include:{
+            lessonsCircle:{
+              include:{
+                lessons:{
+                  include:{
+                    exercises: true
+                  }
+                }
+              }
+            }
+          }
         },
       },
     });

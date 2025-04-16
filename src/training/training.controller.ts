@@ -11,6 +11,6 @@ export class TrainingController {
    @UseGuards(JwtAuthGuard)
   @Get('modules')
   getAllModules() {
-    
+    return this.trainingService.getAllTrainingModules()
   }
 }
