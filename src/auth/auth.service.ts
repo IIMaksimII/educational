@@ -70,14 +70,14 @@ export class AuthService {
     });
       
      if (!user) {
-        throw new UnauthorizedException('Недействительные данные ');
+        throw new UnauthorizedException('1 Недействительные данные ');
       }
     // Сравните пароль с сохраненным хэшем
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     // Если пароль неверен, выдается сообщение об ошибке
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Неверные учетные данные');
+      throw new UnauthorizedException('1 Неверные учетные данные');
     }
    const payload = { sub: user.id, username: user.username, role: user.role };
     const token = await this.jwtService.signAsync(payload, {

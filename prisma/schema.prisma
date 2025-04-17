@@ -42,26 +42,16 @@ model Module {
   Course Course[]
 }
 
-
-
 model Chapter {
   id            Int       @id @default(autoincrement())
   nameChapter   String
   order         Int?     // Порядок внутри модуля
-  lessonsCircle       LessonBuffer[]
+  lessons       Lesson[]
   moduleId      Int       // Внешний ключ к Module
   module        Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)  // Определение связи
   description   String?     // Описание главы
 
   @@map("chapters")
-}
-
-model LessonBuffer{
-  id            Int       @id @default(autoincrement())
-  lessons       Lesson[]
-  chapterId     Int?         // Внешний ключ к Chapter
-  chapter       Chapter?    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  @@map("lessonbuffer")
 }
 
 model Lesson {
@@ -70,8 +60,8 @@ model Lesson {
   order         Int?        // Порядок внутри главы
   typeId        Int       // Внешний ключ к LessonType
   type          LessonType @relation(fields: [typeId], references: [id], onDelete: Cascade) // Определение связи
-  lessonBufferId     Int?         // Внешний ключ к Chapter
-  lessonBuffer       LessonBuffer?    @relation(fields: [lessonBufferId], references: [id], onDelete: Cascade)
+  chapterId     Int?         // Внешний ключ к Chapter
+  chapter       Chapter?    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   exercises     Exercise[]
   userProgress  UserProgress[]
   description   String?      // Описание урока
@@ -124,6 +114,7 @@ model Answer {
 
   @@map("answers")
 }
+
 
 model UserProgress {
   userId      Int
@@ -200,3 +191,4 @@ model UserAchievement {
 
   @@map("user_achievements")
 }
+

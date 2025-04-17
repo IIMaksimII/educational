@@ -1,16 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+
+
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { TrainingService } from './training.service';
-import { CreateTrainingDto } from './dto/create-training.dto';
-import { UpdateTrainingDto } from './dto/update-training.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('training')
 export class TrainingController {
   constructor(private readonly trainingService: TrainingService) {}
 
-   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('modules')
   getAllModules() {
-    return this.trainingService.getAllTrainingModules()
+    return this.trainingService.getAllTrainingModules();
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('lesson/:id/exercises')
+  getExercisesForLesson(@Param('id') id: string) {
+    return this.trainingService.getExercisesForLesson(Number(id));
+  }
+
+  
 }
