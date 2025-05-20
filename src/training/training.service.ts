@@ -5,34 +5,37 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class TrainingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getAllTrainingModules() {
     return this.prisma.module.findMany({
       include: {
         chapters: {
           include: {
-            
-              
-                lessons: {
-                  include: {
-                    exercises: true, 
-                  },
-                },
+
+
+            lessons: {
+              include: {
+                exercises: true,
               },
-          
-          
+            },
+          },
+
+
         },
       },
     });
   }
 
   async getExercisesForLesson(lessonId: number) {
-    
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId },
       include: {
-        exercises: true, 
+        exercises: {
+          include: {
+            answers: true
+          }
+        },
       },
     });
 
