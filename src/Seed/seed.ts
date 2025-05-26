@@ -1,154 +1,65 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { seedUsers } from './data/users';
+import { seedLessonTypes } from './data/lessonTypes';
+import { seedCourses } from './data/courses';
+import { seedModules } from './data/modules';
+import { seedChapters } from './data/chapters';
+import { seedLessons } from './data/lessons';
+import { seedExercises } from './data/exercises';
+import { seedExerciseAttempts } from './data/exerciseAttempts';
+import { seedUserProgress } from './data/userProgress';
+import { seedUserCourses } from './data/userCourses';
+import { seedAchievements } from './data/achievements';
+import { seedUserAchievements } from './data/userAchievements';
 
 const prisma = new PrismaClient();
 
+async function main() {
+  console.log('Seeding users...');
+  const users = await seedUsers();
 
+  console.log('Seeding lesson types...');
+  const lessonTypes = await seedLessonTypes();
 
-async function seed() {
-    // Создание пользователя
-    const user = await prisma.user.create({
-      data: {
-        username: 'testuser',
-        email: 'test@mail.com',
-        passwordHash: await bcrypt.hash('12345678', 10),
-      },
-    });
-  
-    // Создание типа урока
-    const lessonType = await prisma.lessonType.create({
-      data: {
-        name: 'Теория',
-      },
-    });
-  
-    // Создание курса
-    const course = await prisma.course.create({
-      data: {
-        name: 'Основы JavaScript',
-        description: 'Изучение базовых понятий JavaScript',
-        programmingLanguage: 'JavaScript',
-      },
-    });
-  
-    // Создание модуля и привязка к курсу
-    const module = await prisma.module.create({
-      data: {
-        nameModule: 'Введение в JS',
-        description: 'Основные понятия JavaScript',
-        order: 1,
-        Course: {
-          connect: {
-            id: course.id,
-          },
-        },
-      },
-    });
-  
-    // Создание главы
-    const chapter = await prisma.chapter.create({
-      data: {
-        nameChapter: 'Переменные и типы',
-        order: 1,
-        description: 'Научимся работать с переменными и типами данных',
-        module: {
-          connect: { id: module.id },
-        },
-      },
-    });
-  
-    // Создание урока
-    const lesson = await prisma.lesson.create({
-      data: {
-        nameLesson: 'Переменные',
-        order: 1,
-        description: 'var, let и const',
-        videoUrl: '',
-        textContent: 'В этом уроке вы узнаете про переменные в JavaScript.',
-        chapter: { connect: { id: chapter.id } },
-        type: { connect: { id: lessonType.id } },
-      },
-    });
-  
-    // Создание упражнения
-    const exercise = await prisma.exercise.create({
-      data: {
-        lesson: { connect: { id: lesson.id } },
-        type: 'MULTIPLE_CHOICE',
-        questionText: 'Какая переменная является блочной?',
-        correctAnswer: 'let',
-        hint: 'Подумайте про область видимости.',
-        order: 1,
-        points: 10,
-        answers: {
-          create: [
-            { text: 'var', isCorrect: false },
-            { text: 'let', isCorrect: true },
-            { text: 'const', isCorrect: false },
-          ],
-        },
-      },
-    });
+  console.log('Seeding courses...');
+  const courses = await seedCourses();
 
-    
-  
-    // Создание попытки пользователя
-    await prisma.exerciseAttempt.create({
-      data: {
-        user: { connect: { id: user.id } },
-        exercise: { connect: { id: exercise.id } },
-        userAnswer: 'let',
-        correct: true,
-      },
-    });
-  
-    // Прогресс по уроку
-    await prisma.userProgress.create({
-      data: {
-        user: { connect: { id: user.id } },
-        lesson: { connect: { id: lesson.id } },
-        completed: true,
-        score: 10,
-        completionDate: new Date(),
-      },
-    });
-  
-    // Запись пользователя на курс
-    await prisma.userCourse.create({
-      data: {
-        user: { connect: { id: user.id } },
-        course: { connect: { id: course.id } },
-        progress: 100,
-        completed: true,
-      },
-    });
-  
-    // Достижение
-    const achievement = await prisma.achievement.create({
-      data: {
-        name: 'Первый шаг',
-        description: 'Пройди первый урок',
-        criteria: 'Завершить любой урок',
-        pointsAwarded: 50,
-      },
-    });
-  
-    // Назначение достижения пользователю
-    await prisma.userAchievement.create({
-      data: {
-        user: { connect: { id: user.id } },
-        achievement: { connect: { id: achievement.id } },
-      },
-    });
-  
-    console.log('База данных успешно заполнена!');
-  }
-  
-  seed()
-    .catch((e) => {
-      console.error('Ошибка при заполнении:', e);
-      process.exit(1);
-    })
-    .finally(async () => {
-      await prisma.$disconnect();
-    });
+  console.log('Seeding modules...');
+  const modules = await seedModules(courses);
+
+  console.log('Seeding chapters...');
+  const chapters = await seedChapters(modules);
+
+  console.log('Seeding lessons...');
+  const lessons = await seedLessons(chapters, lessonTypes);
+
+  console.log('Seeding exercises...');
+  const exercises = await seedExercises(lessons);
+
+  console.log('Seeding exercise attempts...');
+  await seedExerciseAttempts(users, exercises);
+
+  console.log('Seeding user progress...');
+  await seedUserProgress(users, lessons);
+
+  console.log('Seeding user courses...');
+  await seedUserCourses(users, courses);
+
+  console.log('Seeding achievements...');
+  const achievements = await seedAchievements();
+
+  console.log('Seeding user achievements...');
+  await seedUserAchievements(users, achievements);
+
+  console.log('Seeding completed!');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
