@@ -32,6 +32,20 @@ export async function seedExercises(lessons: { id: number }[]): Promise<Exercise
         { text: 'false', isCorrect: false },
       ],
     },
+    {
+      lessonId: lessons[1].id,
+      
+      type: ExerciseType.MULTIPLE_CHOICE,
+      questionText: 'Для чего нужна нормализация стилей в проекте?',
+      correctAnswer: 'true',
+      hint: '???',
+      order: 1,
+      points: 15,
+      answers: [
+        { text: 'Чтобы приложение не ехало', isCorrect: true },
+        { text: 'А зачем?', isCorrect: false },
+      ],
+    },
   ];
 
   const createdExercises: Exercise[] = [];
