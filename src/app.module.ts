@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
 import { TrainingModule } from './training/training.module';
+import { RatingModule } from './rating/rating.module';
 
 
 @Module({
@@ -22,6 +23,7 @@ import { TrainingModule } from './training/training.module';
     }),
     ProfileModule,
     TrainingModule,
+    RatingModule,
     ],
   controllers: [AuthController],
   providers: [AuthService],
