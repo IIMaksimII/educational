@@ -22,11 +22,19 @@ export class RatingService {
 
   // Получить прогресс всех пользователей
   async getAllProgress() {
-    const all_progress = await this.prisma.userProgress.findMany();
+ const all_progress = await this.prisma.userProgress.findMany({
+    include: {
+      user: {
+        select: {
+          email: true,  // <-- берем email вместо username
+        },
+      },
+    },
+  });
 
-    if (!all_progress) throw new NotFoundException('Ни у кого нет прогресса 0_0');
+  if (!all_progress) throw new NotFoundException('Ни у кого нет прогресса 0_0');
 
-    return all_progress;
+  return all_progress;
   }
 
   // Сохранить/добавить прогресс пользователя
