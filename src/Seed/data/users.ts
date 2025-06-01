@@ -8,7 +8,7 @@ export async function seedUsers() {
     {
       username: 'testuser',
       email: 'testuser@mail.com',
-      passwordHash: await bcrypt.hash('12345678', 10),
+      passwordHash: await bcrypt.hash('12345678', 0),
       role: Role.USER,
       registrationDate: new Date(),
       points: 100,
@@ -18,7 +18,7 @@ export async function seedUsers() {
     {
       username: 'adminuser',
       email: 'admin@mail.com',
-      passwordHash: await bcrypt.hash('adminpass', 10),
+      passwordHash: await bcrypt.hash('adminpass', 0),
       role: Role.ADMIN,
       registrationDate: new Date(),
       points: 500,

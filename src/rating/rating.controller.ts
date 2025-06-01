@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, NotFoundException, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { RatingService } from './rating.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PublishProgressDto } from './rating.dto';
 
 @Controller('rating')
 export class RatingController {
+  prisma: any;
   constructor(private readonly ratingService: RatingService) {}
 
   @UseGuards(JwtAuthGuard)
@@ -27,4 +28,6 @@ export class RatingController {
   async putUserProgress(@Req() req, @Body(new ValidationPipe()) data: PublishProgressDto) {
     return this.ratingService.putUserProgress(req.user.sub, data);
   }
+
+  
 }

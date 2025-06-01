@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+
 import { seedUsers } from './data/users';
 import { seedLessonTypes } from './data/lessonTypes';
 import { seedCourses } from './data/courses';
@@ -12,6 +12,11 @@ import { seedUserProgress } from './data/userProgress';
 import { seedUserCourses } from './data/userCourses';
 import { seedAchievements } from './data/achievements';
 import { seedUserAchievements } from './data/userAchievements';
+
+
+//npx prisma db push --force-reset
+//npx prisma db push
+//npm run seeder
 
 const prisma = new PrismaClient();
 
